@@ -9,7 +9,7 @@
   "issues_url": "https://github.com/evanstucker-hates-2fa/evanstucker-rsa_securid_auth_agent_for_pam/issues",
   "dependencies": [
     {"name":"puppetlabs/stdlib","version_requirement":">= 4.6.0 < 5.0.0"},
-    {"name":"puppetlabs/archive", "version_requirement":"> 2.3.0"}=
+    {"name":"puppetlabs/archive", "version_requirement":"> 2.3.0"}
   ],
   "data_provider": null,
   "operatingsystem_support": [
