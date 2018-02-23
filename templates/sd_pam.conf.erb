@@ -31,7 +31,9 @@ INCL_EXCL_USERS=0
 
 
 #LIST_OF_USERS :: a list of users to include or exclude from SecurID Authentication...Example:
-LIST_OF_USERS=user1:user2
+<% if @excluded_users %>
+LIST_OF_USERS=<%= @excluded_users %>
+<% end %>
 
 
 #PAM_IGNORE_SUPPORT_FOR_USERS :: 1 to return PAM_IGNORE if a user is not SecurID authenticated due to user exclusion support

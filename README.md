@@ -22,7 +22,7 @@ https://community.rsa.com/docs/DOC-39959
 
 1. Open up the appropriate ports in your firewalls and/or security groups. I had to open 5500 UDP and 5550 TCP.
 
-1. Download the agent, PAM-Agent_v7.1.0.1.16.05_06_13_02_04_01.tar, from here:
+1. Download the agent from here:
 
    https://community.rsa.com/docs/DOC-61994
 
@@ -33,23 +33,31 @@ https://community.rsa.com/docs/DOC-39959
 
 ```
 class profile::rsa_securid_auth_agent_for_pam {
-  include ::rsa_securid_auth_agent_for_pam
   include ::rsa_securid_auth_agent_for_pam::sshd
+  class { 'rsa_securid_auth_agent_for_pam':
+    pam_agent_path = '/opt/PAM-Agent_xxxxx.tar',
+    sdconf => '/var/ace/sdconf.rec',  # Optional will fall back to default
+    install_dir => '/opt/pam', # Optional will fall back to default
+    excluded_users => 'user1:user2' # Optional users to exclude from SecurID
+    require => [ File['sdconf.rec'], File['pam-agent'] ]
+  }
   # Optional service declaration for sshd if you don't have one elsewhere.
   #service { 'sshd':
   #  ensure => running,
   #}
-  file { '/var/ace/sdconf.rec':
+  file { 'sdconf.rec':
+    path   => '/var/ace/sdconf.rec'
     mode   => '0600',
     source => "puppet:///modules/${module_name}/rsa_securid_auth_agent_for_pam/sdconf.rec",
   }
-  file { '/opt/PAM-Agent_v7.1.0.1.16.05_06_13_02_04_01.tar':
-    source => "puppet:///modules/${module_name}/rsa_securid_auth_agent_for_pam/PAM-Agent_v7.1.0.1.16.05_06_13_02_04_01.tar",
+  file { 'pam-agent':
+    path   => '/opt/PAM-Agent_xxxx.tar'
+    source => "puppet:///modules/${module_name}/rsa_securid_auth_agent_for_pam/PAM-Agent_xxxx.tar",
   }
 }
 ```
 
-1. Copy sdconf.rec and PAM-Agent_v7.1.0.1.16.05_06_13_02_04_01.tar to
+1. Copy sdconf.rec and PAM-Agent_xxxx.tar to
    modules/profile/files/rsa_securid_auth_agent_for_pam/
 
 1. Did you remember to open up your firewall ports?

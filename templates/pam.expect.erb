@@ -1,11 +1,11 @@
 #!/usr/bin/expect
-spawn /opt/PAM-Agent_v7.1.0.1.16.05_06_13_02_04_01/install_pam.sh
+spawn /opt/pam-agent-install/install_pam.sh
 expect "*More*"
 send "q"
 expect "Do you accept the License Terms and Conditions stated above*"
 send "A\n"
 expect "Enter Directory where sdconf.rec is located*"
-send "\n"
+send "<%= @sdconf %>\n"
 expect "Please enter the root path for the RSA Authentication Agent for PAM directory*"
-send "\n"
+send "<%= @install_dir %>\n"
 expect eof

@@ -1,5 +1,10 @@
 # Class: rsa_securid_auth_agent_for_pam
-class rsa_securid_auth_agent_for_pam {
+class rsa_securid_auth_agent_for_pam(
+  $pam_agent_path, 
+  $sdconf = '', 
+  $install_dir = '',
+  $excluded_users = undef ) {
+
   file { '/var/ace':
     ensure => directory,
     mode   => '0700',
@@ -7,16 +12,24 @@ class rsa_securid_auth_agent_for_pam {
   file { '/var/ace/sdopts.rec':
     content => "CLIENT_IP=${::facts[networking][ip]}\n",
     mode    => '0600',
+    require => File['/var/ace']
   }
-  exec { 'extract PAM-Agent_v7.1.0.1.16.05_06_13_02_04_01.tar':
-    command => '/usr/bin/tar -x -C /opt -f /opt/PAM-Agent_v7.1.0.1.16.05_06_13_02_04_01.tar',
-    creates => '/opt/PAM-Agent_v7.1.0.1.16.05_06_13_02_04_01',
-    require => File['/opt/PAM-Agent_v7.1.0.1.16.05_06_13_02_04_01.tar'],
+  file{'/opt/pam-agent-install':
+    ensure => directory
+  }
+  archive { $pam_agent_path:
+    ensure          => present,
+    extract         => true,
+    extract_command => 'tar xfz %s --strip-components=1',
+    extract_path    => '/opt/pam-agent-install',
+    cleanup         => true,
+    creates         => '/opt/pam-agent-install/install_pam.sh',
+    require         => File[$pam_agent_path]
   }
   ensure_packages(['expect'], { ensure => installed })
-  file { '/opt/PAM-Agent_v7.1.0.1.16.05_06_13_02_04_01.expect':
+  file { '/opt/pam.expect':
     mode   => '0755',
-    source => "puppet:///modules/${module_name}/PAM-Agent_v7.1.0.1.16.05_06_13_02_04_01.expect",
+    content => template("${module_name}/pam.expect.erb")
   }
   if $::facts[os][architecture] == 'x86_64' {
     $bits = '64'
@@ -24,14 +37,14 @@ class rsa_securid_auth_agent_for_pam {
   else {
     $bits = ''
   }
-  exec { '/opt/PAM-Agent_v7.1.0.1.16.05_06_13_02_04_01.expect':
+  exec { '/opt/pam.expect':
     creates => "/usr/lib${bits}/security/pam_securid.so",
     require => [
       Package['expect'],
-      Exec['extract PAM-Agent_v7.1.0.1.16.05_06_13_02_04_01.tar'],
+      Archive[$pam_agent_path:],
     ],
   }
   file { '/etc/sd_pam.conf':
-    source => "puppet:///modules/${module_name}/sd_pam.conf",
+    content => template("${module_name}/sd_pam.conf.erb",
   }
 }
